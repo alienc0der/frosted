@@ -84,3 +84,4 @@ jobs:
           file: releases/*
           file_glob: true
           overwrite: true
+          tag: ${{ github.ref }}
