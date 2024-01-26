@@ -14,6 +14,10 @@ This repository contains a Flutter application that integrates a Rust-based impl
 
 - [flutter_rust_bridge](https://github.com/fzyzcjy/flutter_rust_bridge) integration: leverages the `flutter_rust_bridge` for seamless and efficient communication between Dart and Rust, ensuring smooth operation and integration.
 
+### Frosted demo app
+
+Check the [releases page](https://github.com/alienc0der/frosted/releases/latest) for the Windows and MacOS applications.
+
 ### Getting Started
 
 #### Prerequisites
@@ -72,6 +76,4 @@ This project is licensed under MIT License - see the LICENSE file for details.
 ### Acknowledgments
 
 Thanks to the Zcash Foundation for the FROST library.
-Gratitude to the flutter_rust_bridge team for their excellent tool.
-
-Note: This README provides a general template. You may need to adjust the content, add more specific installation instructions, examples, screenshots, or additional sections as per your project's requirements and specifics.
+Gratitude to the `flutter_rust_bridge` team for their excellent tool.
