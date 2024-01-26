@@ -1,0 +1,87 @@
+name: Frosted Flutter app build and release
+
+on: 
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+  
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.10.0
+        with:
+          channel: "stable"
+          flutter-version: "3.16.7"
+      - name: Build desktop
+        run: |
+          flutter config --enable-macos-desktop
+          flutter build macos --release
+      - name: Create DMG
+        run: |
+          hdiutil create -volname "frosted" -srcfolder build/macos/Build/Products/Release/frosted.app -ov -format UDZO frosted-macos-universal.dmg
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-artifacts
+          path: frosted-macos-universal.dmg
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.10.0
+        with:
+          channel: "stable"
+          flutter-version: "3.16.7"
+      - name: Check flutter version
+        run: flutter --version
+      - name: Build desktop
+        run: |
+          flutter config --enable-windows-desktop
+          flutter build windows --release   
+      - name: Package into zip
+        run: |
+          Compress-Archive -Path build\windows\runner\Release\* -DestinationPath .\frosted-windows-amd64.zip
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-artifacts
+          path: frosted-windows-amd64.zip
+
+  create-release:
+    needs: [build-macos, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare releases directory
+        run: mkdir releases
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: macos-artifacts
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-artifacts
+      - name: Prepare releases
+        run: |
+          cp frosted-windows-amd64.zip releases/
+          cp frosted-macos-universal.dmg releases/
+      - name: Generate checksums
+        run: |
+          cd releases/
+          echo $(sha256sum *)
+          echo $(sha256sum *) >> SHA256CHECKSUMS.txt
+      - name: Upload files to a GitHub release
+        uses: svenstaro/upload-release-action@2.4.1
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: releases/*
+          file_glob: true
+          overwrite: true
